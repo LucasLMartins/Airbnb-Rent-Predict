@@ -6,39 +6,63 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from urllib.parse import urlparse, parse_qs, urlencode
 
-def scrape_prices(url):
+def get_next_page_url(url, items_offset):
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+    query_params['items_offset'] = items_offset
+    updated_query = urlencode(query_params, doseq=True)
+    return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}?{updated_query}"
+
+def scrape_prices(url, num_pages):
     options = Options()
     # Remove headless option to run Chrome in regular mode
     # options.add_argument("--headless")
 
     driver = webdriver.Chrome(options=options)
 
-    driver.get(url)
+    all_prices = []
 
-    # Wait for the prices to load
-    WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'pquyp1l')))
+    for page in range(num_pages):
+        driver.get(url)
 
-    prices = driver.find_elements(By.CLASS_NAME, 'pquyp1l')
-    print(f"Number of prices found: {len(prices)}")  # Print the number of prices found
+        # Wait for the page to load
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'pquyp1l')))
+        
+        # Wait for all prices to load
+        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'pquyp1l')))
 
-    price_data = []
-    for price in prices:
-        price_value = price.text.strip() if price else None
+        prices = driver.find_elements(By.CLASS_NAME, 'pquyp1l')
+        print(f"Number of prices found on page {page + 1}: {len(prices)}")  # Print the number of prices found
 
-        print(f"Price: {price_value}")  # Print price details
+        page_prices = []
+        for price in prices:
+            price_value = price.text.strip() if price else None
+            print(f"Price: {price_value}")  # Print price details
 
-        price_data.append({
-            'Price': price_value
-        })
+            page_prices.append({
+                'Price': price_value
+            })
+
+        all_prices.extend(page_prices)
+
+        # Update the URL to navigate to the next page
+        items_offset = (page + 1) * 20  # Incremental offset for each page
+        next_url = get_next_page_url(url, items_offset)
+        driver.get(next_url)
+
+        # Wait briefly before scraping the next page
+        time.sleep(2)
 
     driver.quit()
 
-    return price_data
+    return all_prices
 
 def main():
     url = 'https://www.airbnb.com.br/s/Curitiba--Paran%C3%A1--Brasil/homes'
-    prices = scrape_prices(url)
+    num_pages = 25  # Number of pages to scrape
+    prices = scrape_prices(url, num_pages)
 
     # Create a DataFrame from the scraped data
     df = pd.DataFrame(prices)

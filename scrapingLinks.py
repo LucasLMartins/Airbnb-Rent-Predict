@@ -17,7 +17,7 @@ def get_next_page_url(url, items_offset):
 
 def scrape_prices(url, num_pages):
     options = Options()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
 
     driver = webdriver.Chrome(options=options)
 
@@ -51,8 +51,6 @@ def scrape_prices(url, num_pages):
         # titles = driver.find_elements(By.CLASS_NAME, 't1jojoys')
         links = driver.find_elements(By.XPATH, '//*[@id="site-content"]/div/div[2]/div/div/div/div/div[1]/div')
 
-        print(len(links))
-
         # print(f"Number of prices found on page {page + 1}: {len(prices)}")
 
         # page_data = []
@@ -64,7 +62,7 @@ def scrape_prices(url, num_pages):
             
             link_value = linkurl.get_attribute("content") if link else None
 
-            page_links.append(link_value)
+            page_links.append({ 'Link': link_value})
             i = i + 1
 
         # all_prices.extend(page_data)
@@ -77,17 +75,13 @@ def scrape_prices(url, num_pages):
     return all_links
 
 def main():
-    url = 'https://www.airbnb.com.br/s/Paran%C3%A1--Brasil/homes'
-    num_pages = 5
+    url = 'https://www.airbnb.com.br/s/Curitiba-~-PR/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2024-05-01&monthly_length=3&monthly_end_date=2024-08-01&price_filter_input_type=0&channel=EXPLORE&query=Curitiba%20-%20PR&place_id=ChIJ3bPNUVPj3JQRCejLuqVrL20&date_picker_type=calendar&source=structured_search_input_header&search_type=autocomplete_click'
+    num_pages = 2
     links = scrape_prices(url, num_pages)
 
     df = pd.DataFrame(links)
     df.to_excel('airbnb_links.xlsx', index=False)
     print("Prices exported to 'airbnb_links.xlsx'")
-
-    print("All Links:")
-    for link in links:
-        print(link)
 
 if __name__ == "__main__":
     main()

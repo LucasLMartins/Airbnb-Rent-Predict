@@ -1,54 +1,56 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
+import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.compose import make_column_selector as selector
+from sklearn.preprocessing import PolynomialFeatures
 
-# Load data
-data = pd.read_csv('sample_clean.csv')
+# Load the CSV file into a DataFrame
+data = pd.read_csv('test.csv')
 
-# Preprocess the target variable (convert to numerical values)
-# Remove non-numeric characters from 'price_USD' column and convert to float
-data['price_USD'] = data['price_USD'].str.replace(r'\D', '').astype(float)
+# Preprocessing
+# Remove non-numeric characters from 'price_USD' column
+data['price_USD'] = data['price_USD'].str.extract('(\d+)').astype(float)
+data['cnt_bedrooms'] = pd.to_numeric(data['cnt_bedrooms'], errors='coerce')  # Convert to numeric
+data['cnt_baths'] = pd.to_numeric(data['cnt_baths'], errors='coerce')  # Convert to numeric
+# Handle any other preprocessing steps here...
+
+# Drop rows with missing values
+data.dropna(inplace=True)
+
+# Creating interaction term
+data['bed_bath_ratio'] = data['cnt_bedrooms'] * data['cnt_baths']
+
+# Splitting the data into features and target variable
+X = data[['cnt_guests', 'cnt_bedrooms', 'cnt_beds', 'cnt_baths', 'bed_bath_ratio']]
 y = data['price_USD']
 
-# Data preprocessing
-# Handle missing values if any
+# Introducing polynomial features
+poly = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly.fit_transform(X)
 
-# Split data into features (X) and target variable (y)
-X = data.drop(['price_USD'], axis=1)
+# Initialize the Random Forest Regressor model
+model = RandomForestRegressor(random_state=42)
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Fit the model on the entire data
+model.fit(X_poly, y)
 
-# Define preprocessing steps
-categorical_transformer = Pipeline(steps=[
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))
-])
+# Hard-coded pre-informed data
+pre_informed_data = pd.DataFrame({
+    'cnt_guests': [7, 2],
+    'cnt_bedrooms': [3, 1],
+    'cnt_beds': [5, 1],
+    'cnt_baths': [2, 1],
+    'bed_bath_ratio': [3, 0]
+})
 
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('cat', categorical_transformer, selector(dtype_include=object))
-])
+# Transform the pre-informed data to include polynomial features
+pre_informed_data_poly = poly.transform(pre_informed_data)
 
-# Define the model
-model = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('regressor', RandomForestRegressor())
-])
+# Predict prices for the pre-informed data
+y_pre_informed_pred = model.predict(pre_informed_data_poly)
 
-# Train the model
-model.fit(X_train, y_train)
+# Round the predicted prices to the nearest whole number
+y_pre_informed_pred_rounded = np.round(y_pre_informed_pred)
 
-# Evaluate the model
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-print(f'Mean Squared Error: {mse}')
-
-# Make predictions on new data
-new_listing = pd.DataFrame([['url', 'header', 'location', 'query', 'name', '...', '...']], columns=X.columns)
-predicted_price = model.predict(new_listing)
-print(f'Predicted Price: {predicted_price}')
+# Print the predicted prices
+print("Predicted prices for the pre-informed data:")
+print(y_pre_informed_pred_rounded)

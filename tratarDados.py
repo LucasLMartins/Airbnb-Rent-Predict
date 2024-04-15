@@ -21,17 +21,28 @@ def limpar_e_converter(texto):
         return int(texto)  # Converte para inteiro
     else:
         return np.nan 
+    
+def extrair_tipo(texto):
+    palavras_chave = ['casa', 'apartamento', 'chalé', 'cabana', 'fazenda', 'trailer']
+    for palavra in palavras_chave:
+        if re.search(r'\b{}\b'.format(palavra), texto, flags=re.IGNORECASE):
+            return palavra
+    return None
 
 # Aplicar as funções de limpeza aos dados do DataFrame
 df['titulo'] = df['titulo'].apply(limpar_texto)
-df['localizacao'] = df['localizacao'].apply(limpar_texto)
+df[['cidade', 'estado', 'pais']] = df['localizacao'].str.split(',', expand=True)
+df['tipo'] = df['tipo'].apply(extrair_tipo)
 df['valor'] = df['valor'].apply(limpar_e_converter)
 df['hospedes'] = df['hospedes'].apply(limpar_e_converter)
 df['quartos'] = df['quartos'].apply(limpar_e_converter)
 df['camas'] = df['camas'].apply(limpar_e_converter)
 df['banheiros'] = df['banheiros'].apply(limpar_e_converter)
 
-# Remover linhas com valores nulos após a limpeza
+df.drop('pais', axis=1, inplace=True)
+df.drop('localizacao', axis=1, inplace=True)
+
+df = df.dropna(subset=['tipo'])
 df = df.dropna()
 
 # Salvar o DataFrame de volta para um arquivo Excel

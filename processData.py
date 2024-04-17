@@ -23,7 +23,7 @@ def limpar_e_converter(texto):
         return np.nan 
     
 def extrair_tipo(texto):
-    palavras_chave = ['casa', 'apartamento', 'chalé', 'cabana', 'fazenda', 'trailer']
+    palavras_chave = ['casa', 'apartamento', 'chalé', 'cabana', 'fazenda', 'trailer', 'conteiner', 'condomínio', 'loft', 'quarto', 'suíte']
     for palavra in palavras_chave:
         if re.search(r'\b{}\b'.format(palavra), texto, flags=re.IGNORECASE):
             return palavra

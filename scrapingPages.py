@@ -145,10 +145,6 @@ def extrair_dados(url):
     except:
         data['banheiros'].append("N/A")
 
-    # try:
-    #     WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="react-application"]/div/div/div[1]/div/div[4]/section/div[2]/div[2]/button'))).click()
-    # except:
-    #     print("Ok not found")
     try:
         WebDriverWait(driver, 1).until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[9]/div/div/section/div/div/div[2]/div/div[1]'))).click()
     except:
@@ -192,7 +188,7 @@ def extrair_dados(url):
 
     data.update(amenitiesData)
 
-# Iterando sobre os links e extraindo os dados
+# Extraindo os dados
 t0 = time.time()
 l = 1
 for link in df_links['Link']:
@@ -207,6 +203,6 @@ for link in df_links['Link']:
 # Convertendo os dados para DataFrame
 df = pd.DataFrame(data)
 
-# Salvando os dados em um novo arquivo Excel
+# Salvando os dados em um novo arquivo
 df.to_excel('airbnb_dados5.xlsx', index=False)
 print(f'Duração do scraping: {time.time() - t0} segundos')

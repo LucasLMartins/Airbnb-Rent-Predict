@@ -15,10 +15,10 @@ def limpar_texto(texto):
 
 # Função para remover letras e manter apenas números
 def limpar_e_converter(texto):
-    texto = re.sub(r'[^0-9]', '', str(texto))  # Remove letras e caracteres especiais
-    texto = re.sub(r'\s+', '', texto)  # Remove espaços em branco
-    if texto:  # Verifica se há texto após a limpeza
-        return int(texto)  # Converte para inteiro
+    texto = re.sub(r'[^0-9]', '', str(texto))
+    texto = re.sub(r'\s+', '', texto) 
+    if texto:
+        return int(texto) 
     else:
         return np.nan 
     

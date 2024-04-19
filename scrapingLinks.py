@@ -75,7 +75,7 @@ def scrape_prices(url, num_pages):
     return all_links
 
 def main():
-    url = 'https://www.airbnb.com.br/s/Colombo-~-PR/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2024-05-01&monthly_length=3&monthly_end_date=2024-08-01&price_filter_input_type=0&channel=EXPLORE&query=Colombo%20-%20PR&date_picker_type=calendar&source=structured_search_input_header&search_type=autocomplete_click&price_filter_num_nights=5&zoom_level=11&place_id=ChIJX2Yvsxvo3JQRFbd4Dj96onE'
+    url = 'https://www.airbnb.com.br/s/Curitiba-~-PR/homes?tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2024-05-01&monthly_length=3&monthly_end_date=2024-08-01&price_filter_input_type=0&channel=EXPLORE&query=Curitiba%20-%20PR&place_id=ChIJ3bPNUVPj3JQRCejLuqVrL20&date_picker_type=calendar&source=structured_search_input_header&search_type=autocomplete_click'
     num_pages = 20
     links = scrape_prices(url, num_pages)
 

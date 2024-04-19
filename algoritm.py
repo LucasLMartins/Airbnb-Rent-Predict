@@ -5,39 +5,33 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 import random
 
-# Carregar os dados
 data = pd.read_excel('dados_tratados.xlsx')
 
-# Aplicar codificação One-Hot a todas as variáveis categóricas
-data_encoded = pd.get_dummies(data, columns=['cidade','estado','titulo'])
+# tratando variáveis de string
+data_encoded = pd.get_dummies(data, columns=['tipo','cidade','estado','titulo'])
 
-# Dividir os dados em conjuntos de treinamento e teste
-X_encoded = data_encoded.drop(['tipo','valor','url'], axis=1)
+X_encoded = data_encoded.drop(['valor','url'], axis=1)
 y_encoded = data_encoded['valor']
-X_train_encoded, X_test_encoded, y_train_encoded, y_test_encoded = train_test_split(X_encoded, y_encoded, test_size=0.2, random_state=42)
+X_train_encoded, X_test_encoded, y_train_encoded, y_test_encoded = train_test_split(X_encoded, y_encoded, test_size=0.1, random_state=42)
 
-# Inicializar e treinar o modelo de regressão linear com os dados codificados
 model_encoded = LinearRegression()
 model_encoded.fit(X_train_encoded, y_train_encoded)
 
-# # Fazer previsões com os dados codificados
 # predictions_encoded = model_encoded.predict(X_test_encoded)
 
-# # Calcular o erro quadrático médio
+# # Calcular o erro quadrático médioe a raiz
 # mse_encoded = mean_squared_error(y_test_encoded, predictions_encoded)
 # rmse = np.sqrt(mse_encoded)
 # print('Mean Squared Error (Encoded):', mse_encoded)
 # print('Root Mean Squared Error:', rmse)
 
-# titulo = input("Digite o título do imóvel: ")
 tipo = input("Digite o tipo do imóvel (Casa, Apartamento): ")
-# cidade = input("Digite a cidade: (Curitiba, Pinhais, São José dos Pinhais)")
 hospedes = input("Digite a quantidade de hóspedes: ")
 quartos = input("Digite a quantidade de quartos: ")
 camas = input("Digite a quantidade de camas: ")
 banheiros = input("Digite a quantidade de banheiros: ")
 
-# Utilizar o modelo treinado para fazer previsões com os dados pré-informados
+# Utilizar o modelo treinado para fazer previsões
 pre_informed_data = pd.DataFrame({
     'titulo': ['Imóvel teste' for _ in range(1)],
     'tipo': [tipo for _ in range(1)],
@@ -88,14 +82,14 @@ pre_informed_data = pd.DataFrame({
     'Jacuzziprivativa': [random.randint(0, 1) for _ in range(1)],
     'Vistaparaojardim': [random.randint(0, 1) for _ in range(1)],
 })
-print("Pre-informed data:")
+print("Dados informados:")
 for data in pre_informed_data.values:
     print(data)
 
-# Align the columns of pre_informed_data with the training data
+# Alinhando as colunas dos dados informados com os dados de treinamento
 pre_informed_data_aligned = pre_informed_data.reindex(columns=X_train_encoded.columns, fill_value=0)
 
-# Make predictions with the aligned data
+# Prever o valor
 predictions_pre_informed = model_encoded.predict(pre_informed_data_aligned)
 
-print('Predicted values:', predictions_pre_informed)
+print('Valor previsto: R$', round(predictions_pre_informed[0], 2))
